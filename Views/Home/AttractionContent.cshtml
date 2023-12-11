@@ -1,0 +1,79 @@
+﻿@model Attractions.Models.Information.InformationDataModel
+@using (Html.BeginForm("AttractionContent", "Home", FormMethod.Get, new { onsubmit = "return confirm('確定要編輯/刪除嗎？');" }))
+{
+    @Html.AntiForgeryToken()
+
+    <h2>(@Model.CityName) @Model.AttractionTitle </h2>
+
+    <div>
+        @Html.Raw(Model.AttractioDesc)
+    </div>
+
+    if (Session["Username"] != null)
+    {
+
+        if (@Model.EditAt != null)
+        {
+            <p>最後更新時間: @Model.EditAt  (@Model.LastEditorName); </p>
+        }
+        else
+        {
+            <p>最後更新時間: 尚未編輯過</p>
+        }
+
+        <button class="edit-btn" onclick="location.href='@Url.Action("EditPage", "Home", new { AttractionID = Model.AttractionID })'">編輯景點</button>
+
+        <button class="delete-btn" data-attraction-id="@Model.AttractionID">景點刪除</button>
+    }
+    else
+    {
+
+        if (@Model.EditAt != null)
+        {
+            <p>最後更新時間: @Model.EditAt</p>
+        }
+        else
+        {
+            <p>最後更新時間: 尚未編輯過</p>
+        }
+
+    }
+
+
+}
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            $(".delete-btn").on("click", function () {
+                var attractionId = $(this).data("attraction-id");
+                var csrfToken = $('input[name="__RequestVerificationToken"]').val();
+
+                    // 使用 AJAX 發送 POST 請求
+                    $.ajax({
+                        url: "/Home/DeleteAttraction",
+                        type: "POST",
+                        data: { AttractionID: attractionId, __RequestVerificationToken: csrfToken },
+                        success: function (result) {
+                            if (result.Success) {
+                                alert(result.Message);
+                                window.location.href = '@Url.Action("AttractionInformation", "Home")';
+                            } else {
+                                alert(result.Message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            alert("刪除失敗。");
+                        }
+                    });
+
+            });
+
+
+        });
+    </script>
+}

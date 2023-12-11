@@ -1,0 +1,101 @@
+﻿@model Attractions.Models.Information.InformationDataModel
+
+@if (Session["Username"] != null)
+{
+    <p>歡迎, @Session["Username"]！</p>
+}
+
+@using (Html.BeginForm("EditPage", "Home", FormMethod.Post, new { onsubmit = "return confirmEdit('確定要編輯嗎？');" }))
+{
+    @Html.AntiForgeryToken()
+    <!-- 添加一個隱藏的 input 欄位來包含 AttractionID -->
+    @Html.HiddenFor(model => model.AttractionID)
+    <div>
+        @Html.LabelFor(model => model.CategoryName, "區域分類:")
+        <!-- 在下拉選單中設定 Selected 屬性 -->
+        @Html.DropDownListFor(model => model.CategoryName, Attractions.Models.CreateModel.GetAreaCategories(), "請選擇", new { @class = "form-control", id = "areaDropdown" })
+
+        @Html.LabelFor(model => model.CityName, "城市:")
+        @Html.DropDownListFor(m => m.CityName, Attractions.Models.CreateModel.GetCitiesByArea(Model.CategoryName), "請先選擇區域", new { @class = "form-control", id = "cityDropdown" })
+    </div>
+
+    <div>
+        @Html.LabelFor(model => model.AttractionTitle, "標題:")
+        @Html.TextBoxFor(model => model.AttractionTitle, new { @class = "form-control" })
+    </div>
+
+    <div>
+        @Html.LabelFor(model => model.AttractioDesc, "景點資訊:")
+        @Html.TextAreaFor(model => model.AttractioDesc, new { @class = "form-control", rows = 8 })
+    </div>
+
+    <button type="submit" class="edit-btn" data-attraction-id="@Model.AttractionID">編輯</button>
+}
+
+<p>@Html.ActionLink("回首頁", "AttractionInformation", new { @class = "btn btn-secondary" })</p>
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // 當區域下拉選單的選擇變化時
+            $('#areaDropdown').change(function () {
+                // 獲取所選區域的值
+                var selectedArea = $(this).val();
+
+                // 發送 AJAX 請求，取得該區域對應的城市清單
+                $.ajax({
+                    url: '/Home/GetCities', // 替換為實際的控制器和方法
+                    type: 'GET',
+                    data: { area: selectedArea },
+                    success: function (cities) {
+                        // 清空城市下拉選單
+                        $('#cityDropdown').empty();
+
+                        // 將新的城市選項加入下拉選單
+                        $.each(cities, function (index, city) {
+                            $('#cityDropdown').append($('<option>', {
+                                value: city.Value,
+                                text: city.Text
+                            }));
+                        });
+                        console.log(cities);
+                    },
+                    error: function (error) {
+                        alert("取得城市清單失敗");
+                    }
+                });
+            });
+
+            $(document).on("click", ".edit-btn", function () {
+                var attractionId = $(this).data("attraction-id");
+
+                    console.log("AttractionID: " + attractionId);
+
+                    $.ajax({
+                        url: "/Home/EditPage",
+                        type: "POST",
+                        data: JSON.stringify({ attraction: attraction }),
+                        contentType: 'application/json',
+
+
+                        success: function (result) {
+                            if (result.Success) {
+                                alert(result.Message);
+                                 window.location.href = '@Url.Action("AttractionInformation", "Home")';
+                            } else {
+                                alert(result.Message);
+                            }
+                        },
+
+                        error: function () {
+                            alert("更新景點失敗。");
+                        }
+                    });
+
+            });
+
+        });
+    </script>
+}
