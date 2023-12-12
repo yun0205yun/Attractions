@@ -4,6 +4,8 @@ using System.Linq;
 using Attractions.Tools;
 using Attractions.Models.Information;
 using System.Collections.Generic;
+using System.Drawing.Printing;
+using System.Web.UI;
 
 
 namespace Attractions
@@ -17,26 +19,36 @@ namespace Attractions
             _repository = new Repository();
         }
 
-       
 
-        public PagedMessagesResult<InformationDataModel> GetPagedMessages(int page, int pageSize, string sortBy = "CreatedAt", string sortOrder = "desc")
+
+        public PagedMessagesResult<InformationDataModel> GetPagedMessages(int page, int pageSize, string sortBy, string sortOrder)
         {
-           
-            var messages = _repository.GetPagedMessages(page, pageSize);
 
-            switch (sortBy)
+            try
             {
-                case "CreatedAt":
-                    messages.Messages = sortOrder == "asc" ? messages.Messages.OrderBy(a => a.CreatedAt).ToList() : messages.Messages.OrderByDescending(a => a.CreatedAt).ToList();
-                    break;
-                case "EditAt":
-                    messages.Messages = sortOrder == "asc" ? messages.Messages.OrderBy(a => a.EditAt).ToList() : messages.Messages.OrderByDescending(a => a.EditAt).ToList();
-                    break;
-                    
+                var messages = _repository.GetPagedMessages(page, pageSize);
+                if (sortBy == "CreatedAt")
+                {
+                    messages.Messages = sortOrder == "asc"
+                        ? messages.Messages.OrderBy(m => m.CreatedAt).ToList()
+                        : messages.Messages.OrderByDescending(m => m.CreatedAt).ToList();
+                }
+                if (sortBy == "EditAt")
+                {
+                    messages.Messages = sortOrder == "asc"
+                        ? messages.Messages.OrderBy(a => a.EditAt).ToList()
+                        : messages.Messages.OrderByDescending(a => a.EditAt).ToList();
+                }
+                 
+                return messages;
             }
-
-            return messages;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetPagedMessages Error: {ex.Message}");
+                return new PagedMessagesResult<InformationDataModel>();
+            }
         }
+
 
 
         // 新增的搜尋景點方法的實現
@@ -46,6 +58,7 @@ namespace Attractions
             {
                 // 請在這裡實現搜尋邏輯，可以參考 Repository 中的相應方法
                 var result = _repository.SearchAttractions(searchText, page, pageSize, selectedAreas, selectedCities);
+                 
                 return result;
             }
             catch (Exception ex)

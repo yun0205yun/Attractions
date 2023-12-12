@@ -25,19 +25,21 @@ namespace Attractions.Controllers
         {
             _service = new Service(); // 初始化 _service，這裡假設 Repository 也具有無參數建構函式
         }
-
+        //顯示全部景點的頁面
         public ActionResult AttractionInformation(string searchText, int? page, string sortBy, string sortOrder)
         {
             try
             {
                 int correctedPage = page.GetValueOrDefault();
                 ViewBag.searchText = searchText;
-                ViewBag.SortBy = sortBy ?? "CreatedAt"; // 默認按創建時間排序
-                ViewBag.SortOrder = sortOrder == "asc" ? "desc" : "asc"; // 切換排序順序
 
-                var paginatedMessages = GetPagedMessagesResult(searchText, correctedPage, PageSize);
+                // 使用排序參數
+                var paginatedMessages = GetPagedMessagesResult(searchText, correctedPage, PageSize, null, null, sortBy, sortOrder);
 
                 var pages = paginatedMessages.Messages.ToPagedList(correctedPage, PageSize, paginatedMessages.TotalMessages);
+
+                // 將排序參數存儲到 ViewBag 中，以便在 View 中使用
+                ViewBag.SortOrder = sortOrder;
 
                 return View(pages);
             }
@@ -49,23 +51,7 @@ namespace Attractions.Controllers
             }
         }
 
-        private PagedMessagesResult<InformationDataModel> GetPagedMessagesResult(string searchText, int correctedPage, int pageSize)
-        {
-            if (string.IsNullOrEmpty(searchText))
-            {
-                return _service.GetPagedMessages(correctedPage, pageSize);
-            }
-            else
-            {
-                // 假設你的 SearchAttractions 方法支持排序參數
-                return _service.SearchAttractions(searchText, correctedPage, pageSize, null, null);
-            }
-        }
-
-
-
-
-
+        //用來換部分頁面
         public ActionResult AjaxPage(string searchText, int? page, List<string> selectedAreas, List<string> selectedCities, string sortBy, string sortOrder)
         {
             int correctedPage = page ?? 1;
@@ -73,12 +59,11 @@ namespace Attractions.Controllers
 
             try
             {
-                var paginatedMessages = GetPagedMessagesResult(searchText, correctedPage, PageSize, selectedAreas, selectedCities);
+                var paginatedMessages = GetPagedMessagesResult(searchText, correctedPage, PageSize, selectedAreas, selectedCities, sortBy, sortOrder);
 
                 if (Request.IsAjaxRequest())
                 {
-                    // 確保 "partialArea" 是正確的部分視圖名稱
-                    return PartialView("partialArea", paginatedMessages.Messages.ToPagedList(correctedPage, PageSize, paginatedMessages.TotalMessages+1));
+                    return PartialView("partialArea", paginatedMessages.Messages.ToPagedList(correctedPage, PageSize, paginatedMessages.TotalMessages + 1));
                 }
                 else
                 {
@@ -97,18 +82,17 @@ namespace Attractions.Controllers
 
 
 
-
-        private PagedMessagesResult<InformationDataModel> GetPagedMessagesResult(string searchText, int correctedPage, int pageSize, List<string> selectedAreas, List<string> selectedCities)
+        //來判斷是輸入文字搜尋  還是沒有輸入
+        private PagedMessagesResult<InformationDataModel> GetPagedMessagesResult(string searchText, int correctedPage, int pageSize, List<string> selectedAreas, List<string> selectedCities, string sortBy, string sortOrder)
         {
             if (string.IsNullOrEmpty(searchText))
             {
-                return _service.GetPagedMessages(correctedPage, pageSize);
+                return _service.GetPagedMessages(correctedPage, pageSize, sortBy, sortOrder);
             }
             else
             {
                 return _service.SearchAttractions(searchText, correctedPage, pageSize, selectedAreas, selectedCities);
             }
-
         }
 
 
@@ -171,11 +155,38 @@ namespace Attractions.Controllers
             return Json(cities, JsonRequestBehavior.AllowGet);
         }
 
-        // 景點內容
+        // 景點內容(按標題下去會出現描述)
         public ActionResult AttractionContent(string title)
         {
             var attraction = _service.GetAttractionByTitle(title);
             return View(attraction);
+        }
+
+         
+
+        // 刪除景點
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteAttraction(int AttractionID)
+        {
+            try
+            {
+                bool success = _service.DeleteAttraction(AttractionID);
+
+                if (success)
+                {
+                    return Json(new { Success = true, Message = "景點刪除成功。" });
+                }
+                else
+                {
+                    return Json(new { Success = false, Message = "刪除景點失敗。" });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DeleteAttraction Error: {ex.Message}");
+                return Json(new { Success = false, Message = "刪除景點失敗。錯誤: " + ex.Message });
+            }
         }
 
         // 編輯更新景色
@@ -207,31 +218,6 @@ namespace Attractions.Controllers
             {
                 Console.WriteLine($"EditPage Error: {ex.Message}");
                 return Json(new { Success = false, Message = "編輯景點失敗。錯誤: " + ex.Message });
-            }
-        }
-
-        // 刪除景點
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteAttraction(int AttractionID)
-        {
-            try
-            {
-                bool success = _service.DeleteAttraction(AttractionID);
-
-                if (success)
-                {
-                    return Json(new { Success = true, Message = "景點刪除成功。" });
-                }
-                else
-                {
-                    return Json(new { Success = false, Message = "刪除景點失敗。" });
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"DeleteAttraction Error: {ex.Message}");
-                return Json(new { Success = false, Message = "刪除景點失敗。錯誤: " + ex.Message });
             }
         }
     }

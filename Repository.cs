@@ -7,11 +7,8 @@ using System.Linq;
 using Attractions.Models.Loggin;
 using Attractions.Tools;
 using Attractions.Models.Information;
-using System.Web.Configuration;
 using System.Collections.Generic;
-using System.Xml.Linq;
 using System.Text;
-using System.Web.Services.Description;
 using System.Web;
 
 namespace Attractions
@@ -109,6 +106,10 @@ namespace Attractions
 
         }
 
+        //以上是登入註冊
+
+
+
 
         //出現全部訊息
         //分頁利用offset和fetch子句
@@ -126,8 +127,8 @@ namespace Attractions
                         JOIN City ON Attraction.CityID = City.CityID
                         JOIN Category ON City.CateID = Category.CateID
                         JOIN Users ON Attraction.CreateUserID = Users.UserId
-                        WHERE Attraction.Status = 1 -- Only search for data with Status 1
-                        ORDER BY Attraction.AttractionID DESC
+                        WHERE Attraction.Status = 1  
+                        ORDER BY Attraction.AttractionID DESC 
                         OFFSET @Offset ROWS
                         FETCH NEXT @PageSize ROWS ONLY;";
 
@@ -161,7 +162,7 @@ namespace Attractions
             }
         }
 
-        // 搜尋
+        // 模糊搜尋
         public PagedMessagesResult<InformationDataModel> SearchAttractions(string searchText, int page, int pageSize, List<string> selectedAreas, List<string> selectedCities)
         {
             try
@@ -213,7 +214,7 @@ namespace Attractions
                             queryBuilder.Append(" AND (Category.CategoryName = @SelectedAreas OR City.CityName = @SelectedCities)");
                         }
 
-                        queryBuilder.Append(" ORDER BY Attraction.AttractionId DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;");
+                        queryBuilder.Append("ORDER BY Attraction.AttractionID DESC  OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;");
 
                         int offset = ((page < 1) ? 0 : page - 1) * pageSize;
 
