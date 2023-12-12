@@ -5,15 +5,22 @@
         <th>區域</th>
         <th>縣市</th>
         <th>標題</th>
-        <th class="sortable-column" data-column-name="CreatedAt" data-sort-order="desc">建立時間 <i class="fa fa-sort-desc"></i></th>
 
-        <th class="sortable-column" data-column-name="EditAt" data-sort-order="asc">最後編輯時間</th>
+        <th>
+            @Html.ActionLink("建立時間", "AttractionInformation", new { sortBy = "CreatedAt", sortOrder = ViewBag.SortOrder == "asc" ? "desc" : "asc" })
+        </th>
+        <th>
+            @Html.ActionLink("最後編輯時間", "AttractionInformation", new { sortBy = "EditAt", sortOrder = ViewBag.SortOrder == "asc" ? "desc" : "asc" })
+        </th>
+      
+
+
 
 
     </tr>
     @if (Model != null)
     {
-         foreach (var attraction in Model)
+        foreach (var attraction in Model)
         {
             <tr>
                 <td>@attraction.CategoryName</td>
@@ -46,3 +53,4 @@
         <p>没有可用的消息。</p>
     }
 </div>
+ 

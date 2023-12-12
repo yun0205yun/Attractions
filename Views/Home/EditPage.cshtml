@@ -5,7 +5,7 @@
     <p>歡迎, @Session["Username"]！</p>
 }
 
-@using (Html.BeginForm("EditPage", "Home", FormMethod.Post, new { onsubmit = "return confirmEdit('確定要編輯嗎？');" }))
+@using (Html.BeginForm("EditPage", "Home", FormMethod.Post, new { onsubmit = "return confirm('確定要編輯嗎？');" }))
 {
     @Html.AntiForgeryToken()
     <!-- 添加一個隱藏的 input 欄位來包含 AttractionID -->
