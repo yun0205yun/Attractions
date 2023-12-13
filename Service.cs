@@ -4,8 +4,6 @@ using System.Linq;
 using Attractions.Tools;
 using Attractions.Models.Information;
 using System.Collections.Generic;
-using System.Drawing.Printing;
-using System.Web.UI;
 
 
 namespace Attractions
@@ -23,32 +21,31 @@ namespace Attractions
 
         public PagedMessagesResult<InformationDataModel> GetPagedMessages(int page, int pageSize, string sortBy, string sortOrder)
         {
-
             try
             {
-                var messages = _repository.GetPagedMessages(page, pageSize);
-                if (sortBy == "CreatedAt")
-                {
-                    messages.Messages = sortOrder == "asc"
-                        ? messages.Messages.OrderBy(m => m.CreatedAt).ToList()
-                        : messages.Messages.OrderByDescending(m => m.CreatedAt).ToList();
-                }
-                if (sortBy == "EditAt")
-                {
-                    messages.Messages = sortOrder == "asc"
-                        ? messages.Messages.OrderBy(a => a.EditAt).ToList()
-                        : messages.Messages.OrderByDescending(a => a.EditAt).ToList();
-                }
-                 
+                var messages = _repository.GetPagedMessages(page, pageSize, sortBy, sortOrder);
+                SortMessages(messages, sortBy, sortOrder);
                 return messages;
             }
             catch (Exception ex)
             {
+
                 Console.WriteLine($"GetPagedMessages Error: {ex.Message}");
                 return new PagedMessagesResult<InformationDataModel>();
             }
         }
-
+        private void SortMessages(PagedMessagesResult<InformationDataModel> messages, string sortBy, string sortOrder)
+        {
+            switch (sortBy)
+            {
+                case "CreatedAt":
+                    messages.Messages = sortOrder == "asc" ? messages.Messages.OrderBy(m => m.CreatedAt).ToList() : messages.Messages.OrderByDescending(m => m.CreatedAt).ToList();
+                    break;
+                case "EditAt":
+                    messages.Messages = sortOrder == "asc" ? messages.Messages.OrderBy(a => a.EditAt).ToList() : messages.Messages.OrderByDescending(a => a.EditAt).ToList();
+                    break;
+            }
+        }
 
 
         // 新增的搜尋景點方法的實現
@@ -58,7 +55,7 @@ namespace Attractions
             {
                 // 請在這裡實現搜尋邏輯，可以參考 Repository 中的相應方法
                 var result = _repository.SearchAttractions(searchText, page, pageSize, selectedAreas, selectedCities);
-                 
+
                 return result;
             }
             catch (Exception ex)
@@ -123,7 +120,7 @@ namespace Attractions
             try
             {
                 _repository.EditPage(attraction);
-                return true; 
+                return true;
             }
             catch (Exception ex)
             {
@@ -133,3 +130,4 @@ namespace Attractions
         }
     }
 }
+

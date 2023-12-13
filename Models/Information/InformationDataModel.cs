@@ -65,5 +65,6 @@ namespace Attractions.Models.Information
         /// </summary>
         public int UserId { get; set; }
 
+
     }
 }

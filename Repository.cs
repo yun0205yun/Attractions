@@ -113,7 +113,7 @@ namespace Attractions
 
         //出現全部訊息
         //分頁利用offset和fetch子句
-        public PagedMessagesResult<InformationDataModel> GetPagedMessages(int? page, int pageSize)
+        public PagedMessagesResult<InformationDataModel> GetPagedMessages(int? page, int pageSize, string sortBy, string sortOrder)
         {
             try
             {
@@ -128,14 +128,18 @@ namespace Attractions
                         JOIN Category ON City.CateID = Category.CateID
                         JOIN Users ON Attraction.CreateUserID = Users.UserId
                         WHERE Attraction.Status = 1  
-                        ORDER BY Attraction.AttractionID DESC 
+                        ORDER BY 
+                            Attraction.CreatedAt DESC , Attraction.EditAt DESC 
                         OFFSET @Offset ROWS
                         FETCH NEXT @PageSize ROWS ONLY;";
-
+                                                                                                                                                                                                                                                                        
                     // Calculate offset
                     int offset = ((page ?? 1) < 1 ? 0 : (page ?? 1) - 1) * pageSize;
 
-                    var messages = connection.Query<InformationDataModel>(query, new { Offset = offset, PageSize = pageSize }).ToList();
+                    var messages = connection.Query<InformationDataModel>(
+                        query,
+                        new { Offset = offset, PageSize = pageSize, SortBy = sortBy, SortOrder = sortOrder }
+                    ).ToList();
 
                     // Calculate total messages
                     int totalMessages = messages?.FirstOrDefault()?.TotalMessages ?? 0;
@@ -161,6 +165,8 @@ namespace Attractions
                 };
             }
         }
+
+
 
         // 模糊搜尋
         public PagedMessagesResult<InformationDataModel> SearchAttractions(string searchText, int page, int pageSize, List<string> selectedAreas, List<string> selectedCities)

@@ -1,6 +1,5 @@
 ﻿@model IPagedList<Attractions.Models.Information.InformationDataModel>
 
-
 <h1>景點資訊列表頁</h1>
 @using (Ajax.BeginForm("AjaxPage", "Home", new AjaxOptions { HttpMethod = "GET", UpdateTargetId = "messageContainer" }))
 {
@@ -12,7 +11,6 @@
     <!-- 選擇城市和區域 把他們隱藏 帶到下一步搜尋 -->
     <input type="hidden" id="selectedAreas" name="selectedAreas" />
     <input type="hidden" id="selectedCities" name="selectedCities" />
-
 }
 
 @if (Session["Username"] != null)
@@ -31,34 +29,37 @@ else
 }
 <!-- 區域、縣市勾選 -->
 <div>
-    <label><input type="checkbox" id="areaNorth">北基宜</label>
-    <label><input type="checkbox" id="cityTaipei">台北</label>
-    <label><input type="checkbox" id="cityXinbei">新北</label>
-    <label><input type="checkbox" id="cityKeelung">基隆</label>
-    <label><input type="checkbox" id="cityYilan">宜蘭</label>
-</div>
-<div>
-    <label><input type="checkbox" id="areaNorth2">桃竹苗</label>
-    <label><input type="checkbox" id="cityTaoyuan">桃園</label>
-    <label><input type="checkbox" id="cityXinzhu">新竹</label>
-    <label><input type="checkbox" id="cityMiaoli">苗栗</label>
-</div>
-<div>
-    <label><input type="checkbox" id="areaCentral">中彰投</label>
-    <label><input type="checkbox" id="cityTaichung">台中</label>
-    <label><input type="checkbox" id="cityChanghua">彰化</label>
-    <label><input type="checkbox" id="cityNantou">南投</label>
-</div>
-<div>
-    <label><input type="checkbox" id="areaSouth">雲嘉南</label>
-    <label><input type="checkbox" id="cityYunlin">雲林</label>
-    <label><input type="checkbox" id="cityChiayi">嘉義</label>
-    <label><input type="checkbox" id="cityTainan">台南</label>
+    <div>
+        <label><input type="checkbox" id="areaNorth">北基宜</label>
+        <label><input type="checkbox" id="cityTaipei">台北</label>
+        <label><input type="checkbox" id="cityXinbei">新北</label>
+        <label><input type="checkbox" id="cityKeelung">基隆</label>
+        <label><input type="checkbox" id="cityYilan">宜蘭</label>
+    </div>
+    <div>
+        <label><input type="checkbox" id="areaNorth2">桃竹苗</label>
+        <label><input type="checkbox" id="cityTaoyuan">桃園</label>
+        <label><input type="checkbox" id="cityXinzhu">新竹</label>
+        <label><input type="checkbox" id="cityMiaoli">苗栗</label>
+    </div>
+    <div>
+        <label><input type="checkbox" id="areaCentral">中彰投</label>
+        <label><input type="checkbox" id="cityTaichung">台中</label>
+        <label><input type="checkbox" id="cityChanghua">彰化</label>
+        <label><input type="checkbox" id="cityNantou">南投</label>
+    </div>
+    <div>
+        <label><input type="checkbox" id="areaSouth">雲嘉南</label>
+        <label><input type="checkbox" id="cityYunlin">雲林</label>
+        <label><input type="checkbox" id="cityChiayi">嘉義</label>
+        <label><input type="checkbox" id="cityTainan">台南</label>
+    </div>
 </div>
 
 <div id="messageContainer">
     @Html.Partial("partialArea", Model)
 </div>
+
 @section scripts {
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>
@@ -74,35 +75,12 @@ else
                 console.log(`Clicked Page: ${clickedPage}`);
                 loadPage(parseInt(clickedPage));
             });
-
+            //新增景點
             $(".create-btn").click(function () {
                 window.location.href = '@Url.Action("Create", "Home")';
             });
 
-            // 點擊建立時間和最後編輯時間進行排序
-            $(document).on("click", ".sortable-column", function () {
-                var columnName = $(this).data("column-name");
-                var sortOrder = $(this).data("sort-order");
-
-                // 切換排序順序
-                sortOrder = sortOrder === "asc" ? "desc" : "asc";
-
-                // 更新數據屬性
-                $(this).data("sort-order", sortOrder);
-
-                // 根據排序順序更新箭頭圖標
-                if (sortOrder === "asc") {
-                    $(this).html(`${columnName} <i class="fa fa-sort-asc"></i>`);
-                } else {
-                    $(this).html(`${columnName} <i class="fa fa-sort-desc"></i>`);
-                }
-
-
-                // 使用排序參數觸發AJAX請求
-                loadPage(page, columnName, sortOrder);
-            });
-
-
+            //搜尋按紐
             $('#searchButton').click(function () {
                 var searchValue = $('#searchInput').val();
                 $('#searchText').val(searchValue);
@@ -134,7 +112,6 @@ else
                 // 阻止表單的默認提交行為
                 return false;
             });
-
 
             // 在文檔準備就緒時綁定表單提交事件
             $(document).on("submit", "form", function (e) {
@@ -169,16 +146,24 @@ else
             }
 
             // 加載頁面
-            function loadPage(page) {
+            function loadPage(page, sortBy, sortOrder) {
                 console.log("Loading Page: " + page);
                 var searchValue = $('#searchInput').val();
                 var selectedAreas = getSelectedCheckboxes('area');
                 var selectedCities = getSelectedCheckboxes('city');
 
+                // 使用排序參數觸發AJAX請求
                 $.ajax({
                     url: '/Home/AjaxPage',
                     type: 'GET',
-                    data: { page: page, searchText: searchValue, selectedAreas: selectedAreas, selectedCities: selectedCities },
+                    data: {
+                        page: page,
+                        searchText: searchValue,
+                        selectedAreas: selectedAreas,
+                        selectedCities: selectedCities,
+                        sortBy: sortBy,
+                        sortOrder: sortOrder
+                    },
                     success: function (result) {
                         $('#messageContainer').html(result);
                     },
@@ -190,6 +175,7 @@ else
                 // 阻止表單的默認提交行為
                 return false;
             }
+
         });
     </script>
 }

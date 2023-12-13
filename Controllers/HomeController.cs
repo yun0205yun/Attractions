@@ -6,7 +6,6 @@ using Attractions.Models.Information;
 using Attractions.Tools;
 using MvcPaging;
 
-
 namespace Attractions.Controllers
 {
     public class HomeController : Controller
@@ -14,10 +13,10 @@ namespace Attractions.Controllers
         private const int PageSize = 5;
         private readonly Service _service;
 
-        // 帶有 Service 參數的建構函式
+        // 使用依賴注入
         public HomeController(Service service)
         {
-            _service = service;
+            _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         // 空的無參數建構函式
@@ -25,7 +24,8 @@ namespace Attractions.Controllers
         {
             _service = new Service(); // 初始化 _service，這裡假設 Repository 也具有無參數建構函式
         }
-        //顯示全部景點的頁面
+
+        // 顯示全部景點的頁面
         public ActionResult AttractionInformation(string searchText, int? page, string sortBy, string sortOrder)
         {
             try
@@ -45,13 +45,12 @@ namespace Attractions.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Front 操作出錯: {ex.Message}");
-                ModelState.AddModelError("", "無法顯示留言。");
+                HandleError(ex, "前端操作出錯");
                 return View(new PagedList<InformationDataModel>(new List<InformationDataModel>(), 1, PageSize));
             }
         }
 
-        //用來換部分頁面
+        // 用來換部分頁面
         public ActionResult AjaxPage(string searchText, int? page, List<string> selectedAreas, List<string> selectedCities, string sortBy, string sortOrder)
         {
             int correctedPage = page ?? 1;
@@ -67,22 +66,19 @@ namespace Attractions.Controllers
                 }
                 else
                 {
-                    return View(paginatedMessages.Messages.ToPagedList(correctedPage, PageSize, paginatedMessages.TotalMessages));
+                    return View(paginatedMessages.Messages.ToPagedList(correctedPage, PageSize, paginatedMessages.TotalMessages + 1));
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"AjaxPage 方法出錯: {ex.Message}");
+                HandleError(ex, "AjaxPage 方法出錯");
                 // 記錄詳細的錯誤信息
-                ErrorLog.LogError($"AjaxPage 方法出錯: {ex.Message}\nStackTrace: {ex.StackTrace}\nInnerException: {ex.InnerException}");
                 ModelState.AddModelError("", "無法顯示留言。");
                 return PartialView("partialArea", new PagedList<InformationDataModel>(new List<InformationDataModel>(), correctedPage, PageSize));
             }
         }
 
-
-
-        //來判斷是輸入文字搜尋  還是沒有輸入
+        // 來判斷是輸入文字搜尋  還是沒有輸入
         private PagedMessagesResult<InformationDataModel> GetPagedMessagesResult(string searchText, int correctedPage, int pageSize, List<string> selectedAreas, List<string> selectedCities, string sortBy, string sortOrder)
         {
             if (string.IsNullOrEmpty(searchText))
@@ -95,11 +91,7 @@ namespace Attractions.Controllers
             }
         }
 
-
-
-
-
-        //新增景點
+        // 新增景點
         public ActionResult Create()
         {
             CreateModel model = new CreateModel();
@@ -122,11 +114,11 @@ namespace Attractions.Controllers
             }
             try
             {
-                int UserId = (int)Session["UserId"];
+                int userId = (int)Session["UserId"];
 
                 var newMessage = new CreateModel
                 {
-                    CreateUserID = UserId,
+                    CreateUserID = userId,
                     CreatedAt = DateTime.Now,
                     CategoryName = createModel.CategoryName,
                     CityName = createModel.CityName,
@@ -140,8 +132,7 @@ namespace Attractions.Controllers
             }
             catch (Exception ex)
             {
-                ErrorLog.LogError($"Error in MessageController: {ex.Message}");
-                Console.WriteLine($"Create 操作出錯: {ex.Message}");
+                HandleError(ex, $"Create 操作出錯: {ex.Message}");
                 ModelState.AddModelError("", "無法創建留言。");
                 return View(createModel);
             }
@@ -161,8 +152,6 @@ namespace Attractions.Controllers
             var attraction = _service.GetAttractionByTitle(title);
             return View(attraction);
         }
-
-         
 
         // 刪除景點
         [HttpPost]
@@ -184,7 +173,7 @@ namespace Attractions.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"DeleteAttraction Error: {ex.Message}");
+                HandleError(ex, $"DeleteAttraction Error: {ex.Message}");
                 return Json(new { Success = false, Message = "刪除景點失敗。錯誤: " + ex.Message });
             }
         }
@@ -216,9 +205,16 @@ namespace Attractions.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"EditPage Error: {ex.Message}");
+                HandleError(ex, $"EditPage Error: {ex.Message}");
                 return Json(new { Success = false, Message = "編輯景點失敗。錯誤: " + ex.Message });
             }
         }
+
+        private void HandleError(Exception ex, string message)
+        {
+            Console.WriteLine($"{message}: {ex.Message}");
+            ModelState.AddModelError("", "無法顯示留言。");
+        }
     }
 }
+

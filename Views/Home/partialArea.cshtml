@@ -7,16 +7,11 @@
         <th>標題</th>
 
         <th>
-            @Html.ActionLink("建立時間", "AttractionInformation", new { sortBy = "CreatedAt", sortOrder = ViewBag.SortOrder == "asc" ? "desc" : "asc" })
+            @Html.ActionLink("建立時間", "AttractionInformation", new { sortBy = "CreatedAt", sortOrder = ViewBag.SortOrder == "asc" ? "desc" : "asc", selectedAreas = ViewBag.SelectedAreas, selectedCities = ViewBag.SelectedCities })
         </th>
         <th>
-            @Html.ActionLink("最後編輯時間", "AttractionInformation", new { sortBy = "EditAt", sortOrder = ViewBag.SortOrder == "asc" ? "desc" : "asc" })
+            @Html.ActionLink("最後編輯時間", "AttractionInformation", new { sortBy = "EditAt", sortOrder = ViewBag.SortOrder == "asc" ? "desc" : "asc", selectedAreas = ViewBag.SelectedAreas, selectedCities = ViewBag.SelectedCities })
         </th>
-      
-
-
-
-
     </tr>
     @if (Model != null)
     {
@@ -26,13 +21,13 @@
                 <td>@attraction.CategoryName</td>
                 <td>@attraction.CityName</td>
                 <td><a href="@Url.Action("AttractionContent", "Home", new { title= attraction.AttractionTitle })">@attraction.AttractionTitle</a></td>
-
                 <td>@attraction.CreatedAt</td>
                 <td>@attraction.EditAt</td>
             </tr>
         }
     }
 </table>
+
 <div>
     @if (Model != null && Model.Any())
     {
@@ -45,7 +40,6 @@
             {
                 @Html.Pager(Model.PageSize, Model.PageIndex, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "messageContainer" }).Options(o => o.Action("AjaxPage"))
             }
-
         </div>
     }
     else
@@ -53,4 +47,3 @@
         <p>没有可用的消息。</p>
     }
 </div>
- 
