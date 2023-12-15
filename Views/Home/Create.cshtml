@@ -4,7 +4,7 @@
 {
     <p>歡迎, @Session["Username"]！</p>
 }
-
+<!--創建一個表單，當表單提交時呼叫 JavaScript 函數 confirmCreate 來確認是否要執行。-->
 @using (Html.BeginForm("Create", "Home", FormMethod.Post, new { onsubmit = "return confirmCreate();" }))
 {
     @Html.AntiForgeryToken()
@@ -48,7 +48,7 @@
 
                 // 發送 AJAX 請求，取得該區域對應的城市清單
                 $.ajax({
-                    url: '/Home/GetCities', // 替換為實際的控制器和方法
+                    url: '/Home/GetCities',
                     type: 'GET',
                     data: { area: selectedArea },
                     success: function (cities) {

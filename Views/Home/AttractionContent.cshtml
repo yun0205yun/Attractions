@@ -3,7 +3,7 @@
 {
     @Html.AntiForgeryToken()
 
-    <h2>(@Model.CityName) @Model.AttractionTitle </h2>
+    <h2><b>(@Model.CityName) @Model.AttractionTitle </b> </h2>
 
     <div>
         @Html.Raw(Model.AttractioDesc)
@@ -14,15 +14,17 @@
 
         if (@Model.EditAt != null)
         {
-            <p>最後更新時間: @Model.EditAt  (@Model.LastEditorName); </p>
+            <br><p>最後更新時間: @Model.EditAt  (@Model.LastEditorName) </p>
+            <br />
         }
         else
         {
-            <p>最後更新時間: 尚未編輯過</p>
+            <br><p>最後更新時間: 尚未編輯過</p>
+            <br />
         }
 
-        <button class="edit-btn" onclick="location.href='@Url.Action("EditPage", "Home", new { AttractionID = Model.AttractionID })'">編輯景點</button>
 
+        <button class="edit-btn" onclick="location.href='@Url.Action("EditPage", "Home", new { AttractionID = Model.AttractionID })'">編輯景點</button>
         <button class="delete-btn" data-attraction-id="@Model.AttractionID">景點刪除</button>
     }
     else
@@ -30,11 +32,13 @@
 
         if (@Model.EditAt != null)
         {
-            <p>最後更新時間: @Model.EditAt</p>
+            <br><p>最後更新時間: @Model.EditAt</p>
+            <br />
         }
         else
         {
-            <p>最後更新時間: 尚未編輯過</p>
+            <br><p>最後更新時間: 尚未編輯過</p>
+            <br />
         }
 
     }
