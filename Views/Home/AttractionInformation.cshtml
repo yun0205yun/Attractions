@@ -1,32 +1,29 @@
 ﻿@model IPagedList<Attractions.Models.Information.InformationDataModel>
 
-<h1>景點資訊列表頁</h1>
+<h2><b>景點資訊列表頁</b></h2>
 @using (Ajax.BeginForm("AjaxPage", "Home", new AjaxOptions { HttpMethod = "GET", UpdateTargetId = "messageContainer" }))
 {
     <!-- 模糊查詢輸入框 -->
-    <input type="text" id="searchInput" placeholder="標題、內容" />
+    <input type="text" id="searchInput"style="width:260px" placeholder="標題、內容" />
     <input type="hidden" id="searchText" name="searchText" />
     <!-- 搜尋 -->
-    <button type="button" id="searchButton">搜尋</button>
+    <button type="button" id="searchButton" style="margin-right:670px;">搜尋</button>
+    if (Session["Username"] != null)
+    {
+        <button class="create-btn">新增景點</button>
+        <a href="@Url.Action("Logout", "Account")">登出</a>
+    }
+    else
+    {
+        <button class="create-btn  " style="display: none;">新增景點</button>
+        <a href="@Url.Action("Logout", "Account")" style="display: none;">登出</a>
+    }
     <!-- 選擇城市和區域 把他們隱藏 帶到下一步搜尋 -->
     <input type="hidden" id="selectedAreas" name="selectedAreas" />
     <input type="hidden" id="selectedCities" name="selectedCities" />
 }
 
-@if (Session["Username"] != null)
-{
-    <div>
-        <button class="create-btn btn btn-primary">新增景點</button>
-        <a href="@Url.Action("Logout", "Account")">登出</a>
-    </div>
-}
-else
-{
-    <div>
-        <button class="create-btn btn btn-primary" style="display: none;">新增景點</button>
-        <a href="@Url.Action("Logout", "Account")" style="display: none;">登出</a>
-    </div>
-}
+
 <!-- 區域、縣市勾選 -->
 <div>
     <div>
@@ -138,12 +135,19 @@ else
 
             // 獲取選中的複選框
             function getSelectedCheckboxes(checkboxGroupName) {
+                // 創建一個空數組，用於存儲被選中複選框的 ID
                 var selectedCheckboxes = [];
+
+                // 選擇所有屬於指定複選框組且被選中的複選框
                 $('input[type="checkbox"][id^=' + checkboxGroupName + ']:checked').each(function () {
+                    // 將被選中複選框的 ID 添加到數組中
                     selectedCheckboxes.push($(this).attr('id').replace(checkboxGroupName, ''));
                 });
+
+                // 返回存儲被選中複選框的 ID 列表的數組
                 return selectedCheckboxes;
             }
+
 
             // 加載頁面
             function loadPage(page, sortBy, sortOrder) {

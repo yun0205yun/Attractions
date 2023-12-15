@@ -7,11 +7,12 @@
         <th>標題</th>
 
         <th>
-            @Html.ActionLink("建立時間", "AttractionInformation", new { sortBy = "CreatedAt", sortOrder = ViewBag.SortOrder == "asc" ? "desc" : "asc", selectedAreas = ViewBag.SelectedAreas, selectedCities = ViewBag.SelectedCities })
+            @Html.ActionLink("建立時間", "AttractionInformation", new { sortBy = "CreatedAt", sortOrder = ViewBag.SortOrder == "asc" ? "desc" : "asc", selectedAreas = ViewBag.SelectedAreas, selectedCities = ViewBag.SelectedCities, searchText = ViewBag.searchText })
         </th>
         <th>
-            @Html.ActionLink("最後編輯時間", "AttractionInformation", new { sortBy = "EditAt", sortOrder = ViewBag.SortOrder == "asc" ? "desc" : "asc", selectedAreas = ViewBag.SelectedAreas, selectedCities = ViewBag.SelectedCities })
+            @Html.ActionLink("最後編輯時間", "AttractionInformation", new { sortBy = "EditAt", sortOrder = ViewBag.SortOrder == "asc" ? "desc" : "asc", selectedAreas = ViewBag.SelectedAreas, selectedCities = ViewBag.SelectedCities, searchText = ViewBag.searchText })
         </th>
+        
     </tr>
     @if (Model != null)
     {
